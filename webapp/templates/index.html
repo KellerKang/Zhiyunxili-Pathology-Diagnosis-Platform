@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>智云解析病理诊断平台</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.ico') }}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">
+                <div>
+                    <p class="brand-title">智云析理病理诊断平台</p>
+                    <p class="brand-subtitle">KGLIP Web</p>
+                </div>
+            </div>
+            <nav>
+                <a class="nav-link" href="#" data-target="dashboard">
+                    <i class="ri-dashboard-line"></i>
+                    仪表盘
+                </a>
+                <a class="nav-link active" href="#" data-target="image">
+                    <i class="ri-image-line"></i>
+                    图像分析
+                </a>
+                <a class="nav-link" href="#" data-target="reports">
+                    <i class="ri-file-chart-line"></i>
+                    诊断报告
+                </a>
+                <a class="nav-link" href="#" data-target="settings">
+                    <i class="ri-settings-3-line"></i>
+                    系统设置
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <p>天津中医药大学</p>
+            </div>
+        </aside>
+        <main class="content">
+            <header class="content-header">
+                <h1 id="sectionTitle">图像分析</h1>
+                <p id="sectionDesc">支持 JPG、PNG、TIF 等格式的病理图像</p>
+            </header>
+
+            <section class="card section-panel hidden" data-section="dashboard">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="ri-macbook-line"></i>
+                            <p>系统信息</p>
+                        </div>
+                        <ul>
+                            <li><span>操作系统</span><strong id="sysOs">{{ system_status.os }}</strong></li>
+                            <li><span>服务版本</span><strong id="sysVersion">{{ system_status.service_version }}</strong></li>
+                            <li><span>运行时间</span><strong id="sysUptime">{{ system_status.uptime }}</strong></li>
+                            <li><span>部署节点</span><strong id="sysNode">{{ system_status.node }}</strong></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="ri-cpu-line"></i>
+                            <p>硬件资源</p>
+                        </div>
+                        <ul>
+                            <li><span>CPU</span><strong id="sysCpu">{{ system_status.cpu }}</strong></li>
+                            <li><span>内存占用</span><strong id="sysMem">{{ system_status.memory }}</strong></li>
+                            <li><span>GPU</span><strong id="sysGpu">{{ system_status.gpu }}</strong></li>
+                            <li><span>显存占用</span><strong id="sysGpuMem">{{ system_status.gpu_memory }}</strong></li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="ri-shield-check-line"></i>
+                            <p>模型状态</p>
+                        </div>
+                        <ul>
+                            <li><span>模型</span><strong>KEEP-Pathology</strong></li>
+                            <li><span>权重版本</span><strong>2025-10-12</strong></li>
+                            <li><span>推理设备</span><strong>自动 (GPU 优先)</strong></li>
+                            <li><span>健康检查</span><strong class="text-success">正常</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card section-panel" data-section="image">
+                <div class="upload-zone">
+                    <div class="upload-drop" id="uploadDrop">
+                        <i class="ri-cloud-upload-line"></i>
+                        <p>拖拽图片到此或</p>
+                        <button id="selectBtn">选择图片</button>
+                        <input type="file" id="imageInput" accept=".jpg,.jpeg,.png,.tif,.tiff" hidden />
+                        <p class="hint">最大 10MB，上传后可预览</p>
+                    </div>
+                    <div class="preview" id="previewArea">
+                        <p>图片预览区域</p>
+                        <img id="previewImage" alt="preview" />
+                    </div>
+                </div>
+                <div class="action-row">
+                    <div>
+                        <p class="action-title">分析设置</p>
+                        <p class="action-desc">模型：KEEP · 推理模式：零样本诊断</p>
+                    </div>
+                    <button id="analyzeBtn" disabled>开始分析</button>
+                </div>
+            </section>
+
+            <section class="card section-panel" data-section="image">
+                <h2>诊断结果</h2>
+                <p class="muted" id="resultHint">请上传图片并点击“开始分析”按钮</p>
+                <div class="result-summary" id="resultSummary">
+                    <div class="result-main">
+                        <p class="result-label" id="resultLabel">尚未推理</p>
+                        <p class="result-confidence" id="resultConfidence">--%</p>
+                        <span class="result-prompt" id="resultPrompt"></span>
+                    </div>
+                    <dl class="result-meta">
+                        <div>
+                            <dt>置信度</dt>
+                            <dd id="resultConfidenceDetail">--%</dd>
+                        </div>
+                        <div>
+                            <dt>推理耗时</dt>
+                            <dd id="resultTime">--</dd>
+                        </div>
+                        <div>
+                            <dt>推理设备</dt>
+                            <dd id="resultDevice">--</dd>
+                        </div>
+                        <div>
+                            <dt>生成时间</dt>
+                            <dd id="resultTimestamp">--</dd>
+                        </div>
+                    </dl>
+                </div>
+            </section>
+
+            <section class="card section-panel hidden" data-section="reports">
+                <div class="report-layout">
+                    <div class="report-current">
+                        <div class="report-preview">
+                            <img id="reportPreview" alt="report preview" />
+                            <p class="placeholder" id="reportPlaceholder">暂无推理图像</p>
+                        </div>
+                        <div class="report-info">
+                            <p class="report-label" id="reportLabel">尚无诊断结果</p>
+                            <p class="report-confidence" id="reportConfidence">--%</p>
+                            <p class="report-prompt" id="reportPrompt">等待新的推理任务</p>
+                        </div>
+                        <form id="doctorNoteForm" class="doctor-form">
+                            <div class="form-row">
+                                <label for="doctorName">主诊医生</label>
+                                <input id="doctorName" type="text" placeholder="请输入姓名" />
+                            </div>
+                            <div class="form-row">
+                                <label for="doctorNote">诊断意见</label>
+                                <textarea id="doctorNote" rows="4" placeholder="可填写病理描述、建议等"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="ghost-btn" id="saveReport">
+                                    <i class="ri-save-3-line"></i> 保存至报告
+                                </button>
+                                <button type="button" class="ghost-btn" id="exportReport">
+                                    <i class="ri-download-line"></i> 导出报告
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="report-history">
+                        <div class="history-header">
+                            <h3>历史记录</h3>
+                            <p class="muted small">展示本机会话中的推理与医生评估</p>
+                        </div>
+                        <div id="historyList" class="history-list">
+                            <p class="placeholder">暂无记录</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card section-panel hidden" data-section="settings">
+                <form class="settings-form">
+                    <div class="form-row">
+                        <label>推理设备</label>
+                        <select>
+                            <option>自动选择 (推荐)</option>
+                            <option>GPU-0 · RTX 4090</option>
+                            <option>GPU-1 · RTX 4090</option>
+                            <option>CPU 模式</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>导出格式</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" checked /> PDF</label>
+                            <label><input type="checkbox" checked /> DICOM</label>
+                            <label><input type="checkbox" /> JSON</label>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>异常告警阈值 (%)</label>
+                        <input type="number" value="85" min="50" max="99" />
+                    </div>
+                    <div class="form-row">
+                        <label>通知方式</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="notify" checked /> 邮件</label>
+                            <label><input type="radio" name="notify" /> 短信</label>
+                            <label><input type="radio" name="notify" /> 系统消息</label>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="ghost-btn">恢复默认</button>
+                        <button type="submit">保存设置</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+
